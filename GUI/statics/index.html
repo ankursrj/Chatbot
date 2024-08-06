@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chatbot</title>
+    <style>
+        /* Add some basic styling */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .chat-container {
+            width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .messages {
+            height: 300px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+        }
+        .messages p {
+            margin: 5px 0;
+        }
+        .input-container {
+            display: flex;
+        }
+        .input-container input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+        .input-container button {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            margin-left: 10px;
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="messages" id="messages"></div>
+        <div class="input-container">
+            <input type="text" id="message" placeholder="Type a message...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const messageInput = document.getElementById("message");
+            const messagesContainer = document.getElementById("messages");
+
+            const message = messageInput.value;
+            if (!message) return;
+
+            // Display user's message
+            const userMessage = document.createElement("p");
+            userMessage.textContent = "You: " + message;
+            messagesContainer.appendChild(userMessage);
+
+            // Send the message to the backend
+            try {
+                const response = await fetch("/chat", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                const data = await response.json();
+
+                // Display bot's response
+                const botMessage = document.createElement("p");
+                botMessage.textContent = "Bot: " + data.response;
+                messagesContainer.appendChild(botMessage);
+
+                // Clear the input
+                messageInput.value = "";
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            } catch (error) {
+                console.error("Error:", error);
+                const errorMessage = document.createElement("p");
+                errorMessage.textContent = "Error: Unable to get response from the server";
+                messagesContainer.appendChild(errorMessage);
+            }
+        }
+    </script>
+</body>
+</html>
