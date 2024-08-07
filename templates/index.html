@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .chat-container {
+            width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .messages {
+            height: 300px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+        }
+        .messages p {
+            margin: 5px 0;
+        }
+        .input-container {
+            display: flex;
+        }
+        .input-container input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+        .input-container button {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            margin-left: 10px;
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+</head>
+<body>
+    <div class="chat-container">
+        <h1>Chat with the bot</h1>
+        <div class="messages" id="messages"></div>
+        <div class="input-container">
+            <input type="text" id="userInput" placeholder="Type your message here..." autofocus>
+            <button id="sendButton">Send</button>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $("#sendButton").click(function() {
+                var userMessage = $("#userInput").val();
+                if (userMessage.trim() === "") {
+                    return;
+                }
+                $("#messages").append("<div><strong>You:</strong> " + userMessage + "</div>");
+                $("#userInput").val("");
+
+                $.ajax({
+                    url: '/predict',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ message: userMessage }),
+                    success: function(response) {
+                        $("#messages").append("<div><strong>Bot:</strong> " + response.response + "</div>");
+                        $("#messages").scrollTop($("#messages")[0].scrollHeight);
+                    },
+                    error: function() {
+                        $("#messages").append("<div><strong>Bot:</strong> Unable to get response from server</div>");
+                        $("#messages").scrollTop($("#messages")[0].scrollHeight);
+                    }
+                });
+            });
+
+            $("#userInput").keypress(function(event) {
+                if (event.which == 13) {
+                    $("#sendButton").click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
